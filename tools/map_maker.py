@@ -1,4 +1,4 @@
-import pygame, sys, random, math_functions
+import pygame, sys, random, math_functions, os
 tile_size = 32
 world_size_x = 100
 world_size_y = 100
@@ -8,10 +8,10 @@ default_state = 0
 
 state = 0
 states = [
-    [255, 255, 255],
-    [150, 150, 150],
-    [150, 150, 255],
-    [0, 0, 255]
+    [255, 255, 255], # empty
+    [150, 150, 150], # draw but no collision
+    [100, 100, 150], # empty with collision
+    [0, 0, 255]      # draw with collsion
 ]
 
 for y in range(world_size_y):
@@ -32,6 +32,22 @@ cam_speed = 100
 lmb_pressed = False
 font = pygame.font.Font(None, 32)
 
+def save_file():
+    file_i = 0
+    file_str = f'./tools/saves/{file_i}.map'
+    
+    while os.path.exists(file_str):
+        file_i += 1
+        file_str = f'./tools/saves/{file_i}.map'
+    
+    with open(file_str, "w") as file:
+        for y in world:
+            st = ''
+            for x in y:
+                st += f'{x}, '
+            st += '\n'
+            file.write(st)
+
 while True:
     mouse_pos = pygame.mouse.get_pos()
     for event in pygame.event.get():
@@ -48,6 +64,10 @@ while True:
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 lmb_pressed = False
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_F3:
+                save_file()
     
     state = math_functions.clamp(state, 0, len(states)-1)
     
@@ -75,7 +95,7 @@ while True:
             pygame.draw.rect(screen, color, [x_i * tile_size - offset[0], y_i * tile_size - offset[1], tile_size, tile_size])
     
     
-    t = font.render(f'{state}', True, [0, 0, 0])
+    t = font.render(f'{state}                                                                Press the F3 key to create a file for this map.', True, [0, 0, 0])
     screen.blit(t, [0, 0])    
     
     pygame.display.update()

@@ -68,7 +68,7 @@ class Bullet(Entity):
         self.velocity = [self.dir[0] * self.speed, self.dir[1] * self.speed]
         self.surf = pygame.Surface([8, 8])
         self.frame = 0
-        self.max_frame = 10
+        self.max_frame = 60
     
     def draw(self, surf:pygame.Surface, parent:Entity, i):
         surf.blit(self.surf, [self.left - 4, self.top - 4])
@@ -84,6 +84,7 @@ class Player(Entity):
         self.dash_speed = speed * 5
         self.size = [width, height]
         self.rotation = 0
+        self.shoot_frame = 0
         self.draw_list :list[Bullet]= []
     
     def update(self, rect_list:list[pygame.Rect], input:input_manager.InputManager):
@@ -98,9 +99,13 @@ class Player(Entity):
         for item in self.draw_list:
             item.move_and_slide(rect_list)
         
-        if input.mouse_buttons[0]:
+        if input.mouse_buttons[0] and self.shoot_frame == 0:
             mouse_spawn_mult = 20
             self.draw_list.append(Bullet(self.centerx + mouse_dir[0] * mouse_spawn_mult, self.centery + mouse_dir[1] * mouse_spawn_mult, mouse_dir))
+            self.shoot_frame = 30
+        
+        self.shoot_frame -= 1
+        self.shoot_frame = math_functions.clamp(self.shoot_frame, 0, 10000000)
 
     def draw(self, surf:pygame.Surface, offset:list, sprite_m:sprite_manager.SpriteManager):
         sprite = pygame.Surface(self.size).convert_alpha()
