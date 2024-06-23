@@ -5,6 +5,12 @@ class InputManager:
     def __init__(self, keyList:list[int]=[]):
         self.key_info_list = []
         self.key_state_list = []
+        self.mouse_pos = [0, 0]
+        self.mouse_button_amount = 3
+        self.mouse_buttons = []
+        
+        for i in range(self.mouse_button_amount):
+            self.mouse_buttons.append(False)
         
         if keyList != []:
             self.add_key_list(keyList)
@@ -46,7 +52,13 @@ class InputManager:
         return math_functions.normalize([x, y])
 
     def poll(self, event:pygame.event):
+        self.mouse_pos = pygame.mouse.get_pos()
+        
         if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             for i, num in enumerate(self.key_info_list):
                 if num == event.key:
                     self.key_state_list[i] = (event.type == pygame.KEYDOWN)
+            
+        elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
+            if event.button <= self.mouse_button_amount:
+                self.mouse_buttons[event.button-1] = (event.type == pygame.MOUSEBUTTONDOWN)

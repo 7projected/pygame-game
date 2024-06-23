@@ -1,4 +1,4 @@
-import pygame, input_manager, sprite_manager
+import pygame, input_manager, sprite_manager, math_functions, math
 
 class Entity(pygame.Rect):
     def __init__(self, pos_x, pos_y, width, height):
@@ -64,16 +64,24 @@ class Player(Entity):
     def __init__(self, pos_x:float, pos_y:float, width:int, height:int, speed:float):
         super().__init__(pos_x, pos_y, width, height)
         self.speed = speed
+        self.dash_speed = speed * 5
         self.size = [width, height]
+        self.rotation = 0
     
     def update(self, rect_list:list[pygame.Rect], input:input_manager.InputManager):
         input_dir = input.get_vector(pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s)
         self.velocity = [input_dir[0] * self.speed, input_dir[1] * self.speed]
-        
         self.move_and_slide(rect_list)
+        
+        mouse_dir = math_functions.normalize([input.mouse_pos[0] - self.centerx, input.mouse_pos[1] - self.centery])
+        # makes the rotation face the mouse dir
+        self.rotation = (180 / math.pi) * -math.atan2(mouse_dir[0], mouse_dir[1])
 
     def draw(self, surf:pygame.Surface, offset:list, sprite_m:sprite_manager.SpriteManager):
-        s = pygame.Surface(self.size)
-        s.fill([255,0,0])
-        p = [self.centerx - (s.get_width()/2), self.centery - (s.get_height()/2)]
-        surf.blit(s, [p[0] + offset[0], p[1] + offset[1]])
+        sprite = pygame.Surface(self.size).convert_alpha()
+        sprite.fill([0, 0, 0, 0])
+        pygame.draw.rect(sprite, [0, 0, 0], [0, 0, self.size[0], self.size[1]])
+        
+        rotated_sprite = pygame.transform.rotate(sprite, int(-self.rotation))
+        draw_position = rotated_sprite.get_rect(center = sprite.get_rect(topleft = self.topleft).center)
+        surf.blit(rotated_sprite, [draw_position[0] + offset[0], draw_position[1] + offset[1]])
