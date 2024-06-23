@@ -22,6 +22,5 @@ while True:
     screen.fill([255,255,255])
     
     player.draw(screen, [0, 0], sprite)
-    
     pygame.display.update()
     clock.tick(60)
