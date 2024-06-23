@@ -44,7 +44,7 @@ def save_file():
         for y in world:
             st = ''
             for x in y:
-                st += f'{x}, '
+                st += f'{x} '
             st += '\n'
             file.write(st)
 
